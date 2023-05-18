@@ -1,0 +1,10 @@
+{
+    "version": 2,
+    "name": "major-project",
+    "builds": [
+       { "src": "app/src/server.js", "use": "@vercel/node" }
+    ],
+    "routes": [
+       { "src": "/.*", "dest": "app/src/server.js" }
+    ]
+ }
