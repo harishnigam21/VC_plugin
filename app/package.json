@@ -9,7 +9,7 @@
         "lint": "npx prettier --write ."
     },
     "engines": {
-        "node": "14.x"
+        "node": "22.x"
     },
     "repository": {
         "type": "git",
