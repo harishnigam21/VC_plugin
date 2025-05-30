@@ -1,11 +1,3 @@
-/*
- ██████ ██      ██ ███████ ███    ██ ████████ 
-██      ██      ██ ██      ████   ██    ██    
-██      ██      ██ █████   ██ ██  ██    ██    
-██      ██      ██ ██      ██  ██ ██    ██    
- ██████ ███████ ██ ███████ ██   ████    ██   
-*/
-
 'use strict'; // https://www.w3schools.com/js/js_strict.asp
 
 const isHttps = false; // must be the same on server.js
@@ -553,10 +545,7 @@ function getPeerInfo() {
     };
 }
 
-/**
- * Get approximative peer geolocation
- * Get your API Key at https://extreme-ip-lookup.com
- */
+
 async function getPeerGeoLocation() {
     console.log('07. Get peer geo location');
     fetch(peerLoockupUrl)
@@ -567,18 +556,11 @@ async function getPeerGeoLocation() {
         .catch((err) => console.warn(err));
 }
 
-/**
- * Get Signaling server URL
- * @returns {string} Signaling server URL
- */
 function getSignalingServer() {
     return 'https://vc-back.onrender.com/';
 }
 
-/**
- * Generate random Room id if not set
- * @returns {string} Room Id
- */
+
 function getRoomId() {
     // chek if passed as params /join?room=id
     let qs = new URLSearchParams(window.location.search);
@@ -596,11 +578,6 @@ function getRoomId() {
     return roomId;
 }
 
-/**
- * Generate random Id
- * @param {integer} length
- * @returns {string} random id
- */
 function makeId(length) {
     let result = '';
     let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -611,10 +588,6 @@ function makeId(length) {
     return result;
 }
 
-/**
- * Check if notify is set
- * @returns {boolean} true/false (default true)
- */
 function getNotify() {
     let qs = new URLSearchParams(window.location.search);
     let notify = qs.get('notify');
@@ -625,19 +598,12 @@ function getNotify() {
     return true;
 }
 
-/**
- * Check if peer name is set
- * @returns {string} Peer Name
- */
+
 function getPeerName() {
     let qs = new URLSearchParams(window.location.search);
     return qs.get('name');
 }
 
-/**
- * Is screen enabled on join room
- * @returns {boolean} true/false
- */
 function getScreenEnabled() {
     let qs = new URLSearchParams(window.location.search);
     let screen = qs.get('screen');
@@ -649,26 +615,15 @@ function getScreenEnabled() {
     return false;
 }
 
-/**
- * Check if there is peer connections
- * @returns {boolean} true/false
- */
 function thereIsPeerConnections() {
     if (Object.keys(peerConnections).length === 0) return false;
     return true;
 }
 
-/**
- * Count the peer connections
- * @returns peer connections count
- */
 function countPeerConnections() {
     return Object.keys(peerConnections).length;
 }
 
-/**
- * On body load Get started
- */
 function initClientPeer() {
     if (!isWebRTCSupported) {
         return userLog('error', 'This browser seems not supported WebRTC!');
@@ -698,7 +653,6 @@ function initClientPeer() {
         const upgradedTransport = signalingSocket.io.engine.transport.name; // in most cases, "websocket"
         console.log('Connection upgraded transport', upgradedTransport);
     });
-
     // on receiving data from signaling server...
     signalingSocket.on('connect', handleConnect);
     signalingSocket.on('roomIsLocked', handleUnlockTheRoom);
@@ -716,21 +670,12 @@ function initClientPeer() {
     signalingSocket.on('videoPlayer', handleVideoPlayer);
     signalingSocket.on('disconnect', handleDisconnect);
     signalingSocket.on('removePeer', handleRemovePeer);
-} // end [initClientPeer]
+} 
 
-/**
- * Send async data to signaling server (server.js)
- * @param {string} msg msg to send to signaling server
- * @param {object} config data to send to signaling server
- */
 async function sendToServer(msg, config = {}) {
     await signalingSocket.emit(msg, config);
 }
 
-/**
- * Send async data through RTC Data Channels
- * @param {object} config data
- */
 async function sendToDataChannel(config) {
     if (thereIsPeerConnections() && typeof config === 'object' && config !== null) {
         for (let peer_id in chatDataChannels) {
@@ -740,10 +685,6 @@ async function sendToDataChannel(config) {
     }
 }
 
-/**
- * Connected to Signaling Server. Once the user has given us access to their
- * microphone/cam, join the channel and start peering up
- */
 async function handleConnect() {
     console.log('03. Connected to signaling server');
 
@@ -763,14 +704,9 @@ async function handleConnect() {
     }
 }
 
-/**
- * Handle some signaling server info
- * @param {object} config data
- */
 function handleServerInfo(config) {
     let peers_count = config.peers_count;
     console.log('13. Peers count', peers_count);
-
     // Limit room to n peers
     if (userLimitsActive && peers_count > usersCountLimit) {
         return roomIsBusy();
@@ -789,10 +725,6 @@ function handleServerInfo(config) {
     }
 }
 
-/**
- * Room is busy, disconnect me and alert the user that
- * will be redirected to home page
- */
 function roomIsBusy() {
     signalingSocket.disconnect();
     playSound('alert');
@@ -819,12 +751,6 @@ function roomIsBusy() {
     });
 }
 
-/**
- * Presenter can do anything, for others you can limit
- * some functions by hidden the buttons etc.
- *
- * @param {boolean} isPresenter true/false
- */
 function handleRules(isPresenter) {
     console.log('14. Peer isPresenter: ' + isPresenter);
     if (!isPresenter) {
@@ -847,9 +773,6 @@ function handleRules(isPresenter) {
     handleButtonsRule();
 }
 
-/**
- * Hide not desired buttons
- */
 function handleButtonsRule() {
     // Main
     elemDisplay(shareRoomBtn, buttons.main.showShareRoomBtn);
@@ -878,9 +801,6 @@ function handleButtonsRule() {
     elemDisplay(tabRoomSecurity, buttons.settings.showTabRoomSecurity);
 }
 
-/**
- * set your name for the conference
- */
 async function whoAreYou() {
     console.log('11. Who are you?');
     if (myPeerName) {
@@ -941,10 +861,6 @@ async function whoAreYou() {
     setTippy(initVideoBtn, 'Stop the video', 'top');
 }
 
-/**
- * Check peer audio and video &audio=1&video=1
- * 1/true = enabled / 0/false = disabled
- */
 function checkPeerAudioVideo() {
     let qs = new URLSearchParams(window.location.search);
     let audio = qs.get('audio');
@@ -961,9 +877,6 @@ function checkPeerAudioVideo() {
     }
 }
 
-/**
- * Room and Peer name are ok Join Channel
- */
 function whoAreYouJoin() {
     myVideoWrap.style.display = 'inline';
     myVideoParagraph.innerHTML = myPeerName + ' (me)';
@@ -973,9 +886,6 @@ function whoAreYouJoin() {
     setTheme(mirotalkTheme);
 }
 
-/**
- * join to channel and send some peer info
- */
 async function joinToChannel() {
     console.log('12. join to channel', roomId);
 
@@ -997,9 +907,6 @@ async function joinToChannel() {
     });
 }
 
-/**
- * welcome message
- */
 function welcomeUser() {
     const myRoomUrl = window.location.href;
     playSound('newMessage');
@@ -1043,11 +950,6 @@ function welcomeUser() {
     });
 }
 
-/**
- * When we join a group, our signaling server will send out 'addPeer' events to each pair of users in the group (creating a fully-connected graph of users,
- * ie if there are 6 people in the channel you will connect directly to the other 5, so there will be a total of 15 connections in the network).
- * @param {object} config data
- */
 async function handleAddPeer(config) {
     //console.log("addPeer", JSON.stringify(config));
 
@@ -1118,12 +1020,6 @@ async function handleAddPeer(config) {
     playSound('addPeer');
 }
 
-/**
- * Handle peers connection state
- * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/connectionstatechange_event
- * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/connectionState
- * @param {string} peer_id socket.id
- */
 async function handlePeersConnectionStatus(peer_id) {
     peerConnections[peer_id].onconnectionstatechange = function (event) {
         const connectionStatus = event.currentTarget.connectionState;
@@ -1138,10 +1034,6 @@ async function handlePeersConnectionStatus(peer_id) {
     };
 }
 
-/**
- * https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onicecandidate
- * @param {string} peer_id socket.id
- */
 async function handleOnIceCandidate(peer_id) {
     peerConnections[peer_id].onicecandidate = (event) => {
         if (!event.candidate) return;

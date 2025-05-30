@@ -36,7 +36,7 @@ app.use(cors());
 // --- Socket.IO CORS Configuration ---
 // This is the MOST IMPORTANT change for Vercel deployments with Socket.IO
 const { Server } = require("socket.io");
-const io = new Server (server, {
+const io = new Server(server, {
   cors: {
     // Replace with the ACTUAL URL of your frontend application when deployed on Vercel.
     // For local development, you might add 'http://localhost:3000' or whatever your frontend runs on.
@@ -87,15 +87,33 @@ function broadcastByID(ids, name, msg) {
 
 io.on("connection", function (socket) {
   const sid = socket.id;
-  let currentRoom;
+  let currentRoom; // This variable will store the room the socket is currently in
 
   log("connection socket id:", sid);
 
   for (const msg of ["disconnect", "disconnecting", "error"]) {
     socket.on(msg, (data) => {
       log(`* ${msg}:`, data);
-      brokenSocket(socket);
-      removeSocketFromRoom(sid, currentRoom);
+      // brokenSocket(socket); // You can keep this if you want a global "broken" list
+
+      // --- IMPORTANT CHANGE FOR DISCONNECTS ---
+      if (currentRoom) {
+        // Only if the socket was in a room
+        // Get all peers in the room *before* removing the disconnecting socket
+        const peersInRoom = allSocketsForRoom(currentRoom).filter(
+          (peerId) => peerId !== sid
+        );
+
+        // Notify all *remaining* peers in the room that this socket disconnected
+        peersInRoom.forEach((peerId) => {
+          // Use emitByID to send to specific socket, or io.to(room).emit for everyone in room
+          emitByID(peerId, "peer-left", { id: sid }); // Custom event for leaving
+        });
+
+        // Now remove the socket from the room management
+        removeSocketFromRoom(sid, currentRoom);
+      }
+      // --- END IMPORTANT CHANGE ---
     });
   }
 
@@ -110,8 +128,9 @@ io.on("connection", function (socket) {
   });
 
   socket.on("join", ({ room }) => {
-    let peers = allSocketsForRoom(room);
-    const full = peers.length >= config.max;
+    let peersInRoomBeforeJoin = allSocketsForRoom(room); // Get peers *before* this socket joins
+    const full = peersInRoomBeforeJoin.length >= config.max;
+
     if (full) {
       socket.emit("error", {
         error: `Room ${room} is full`,
@@ -119,13 +138,34 @@ io.on("connection", function (socket) {
         full,
       });
     } else {
-      removeSocketFromRoom(sid, currentRoom);
-      addSocketToRoom(sid, room);
-      currentRoom = room;
+      // First, remove from any previous room if the socket is re-joining
+      if (currentRoom && currentRoom !== room) {
+        removeSocketFromRoom(sid, currentRoom);
+        // Optionally, notify old room that this socket left
+        const oldRoomPeers = allSocketsForRoom(currentRoom);
+        oldRoomPeers.forEach((peerId) => {
+          emitByID(peerId, "peer-left", { id: sid });
+        });
+      }
+
+      addSocketToRoom(sid, room); // Add the new socket to the room
+      currentRoom = room; // Update currentRoom for this socket
+
+      // 1. Tell the NEWLY JOINED socket about existing peers
       socket.emit("joined", {
         room,
-        peers,
+        peers: peersInRoomBeforeJoin, // These are the Socket IDs of the peers already in the room
       });
+
+      // 2. Tell the EXISTING peers in the room about the NEWLY JOINED socket
+      peersInRoomBeforeJoin.forEach((existingPeerId) => {
+        emitByID(existingPeerId, "peer-joined", { id: sid }); // Custom event for joining
+      });
+
+      log(
+        `Socket ${sid} joined room ${room}. Existing peers:`,
+        peersInRoomBeforeJoin.length
+      );
     }
   });
 
