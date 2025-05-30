@@ -66,10 +66,10 @@ if (isHttps) {
         cert: fs.readFileSync(path.join(__dirname, '../ssl/cert.pem'), 'utf-8'),
     };
     server = https.createServer(options, app);
-    host = 'https://' + 'vc-back-three.vercel.app' + ':' + port;
+    host = 'https://' + 'localhost' + ':' + port;
 } else {
     server = http.createServer(app);
-    host = 'http://' + 'vc-back-three.vercel.app' + ':' + port;
+    host = 'http://' + 'localhost' + ':' + port;
 }
 
 /*  
@@ -319,7 +319,7 @@ app.post('/slack', (req, res) => {
  * @returns  entrypoint / Room URL for your meeting.
  */
 function getMeetingURL(host) {
-    return 'http' + (host.includes('vc-back-three.vercel.app') ? '' : 's') + '://' + host + '/join/' + uuidV4();
+    return 'http' + (host.includes('localhost') ? '' : 's') + '://' + host + '/join/' + uuidV4();
 }
 
 // 

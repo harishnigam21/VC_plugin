@@ -15,7 +15,7 @@ const config = require("./config");
 
 const CONFIG = {
   title: config.title,
-  host: process.env.HOST || "vc-back-three.vercel.app",
+  host: process.env.HOST || "localhost",
   port: process.env.PORT || 4444,
   timeout: config.timeout || 30000,
   max: config.max || 50,
