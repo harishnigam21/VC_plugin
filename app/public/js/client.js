@@ -1037,7 +1037,7 @@ function welcomeUser() {
         } else if (result.isDenied) {
             let message = {
                 email: '',
-                subject: 'Please join our Group 19 Video Chat Meeting',
+                subject: 'Please join Video Chat Meeting',
                 body: 'Click to join: ' + myRoomUrl,
             };
             shareRoomByEmail(message);
@@ -3573,7 +3573,7 @@ async function shareRoomUrl() {
             } else if (result.isDenied) {
                 let message = {
                     email: '',
-                    subject: 'Please join our Group 19 Video Chat Meeting',
+                    subject: 'Please join Video Chat Meeting',
                     body: 'Click to join: ' + myRoomUrl,
                 };
                 shareRoomByEmail(message);

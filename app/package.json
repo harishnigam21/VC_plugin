@@ -1,5 +1,5 @@
 {
-    "name": "Group 19 Video Conference",
+    "name": "Video Conference",
     "version": "1.0.1",
     "description": "A free WebRTC browser-based video call",
     "main": "server.js",
@@ -13,7 +13,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/miroslavpejic85/Group 19 Video Conference"
+        "url": "https://github.com/harishnigam21/Video-Conferencing-plugin-for-moodle"
     },
     "keywords": [
         "webrtc",
@@ -24,7 +24,7 @@
     ],
     "author": "Miroslav Pejic",
     "license": "AGPL-3.0",
-    "homepage": "https://github.com/miroslavpejic85/Group 19 Video Conference",
+    "homepage": "https://github.com/harishnigam21/Video-Conferencing-plugin-for-moodle",
     "dependencies": {
         "body-parser": "^1.20.1",
         "compression": "^1.7.4",

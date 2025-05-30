@@ -1,28 +1,26 @@
 {
-  "name": "group19-signal",
+  "name": "signal-server",
   "version": "1.1.0",
-  "description": "WebRTC Signaling Server for our moodle project",
+  "description": "WebRTC Signaling Server",
   "private": true,
   "main": "server.js",
   "scripts": {
-    "start": "pm2 start server.js",
-    "stop": "pm2 stop server",
-    "debug": "DEBUG=signal:* nodemon --inspect ./server.js",
-    "serve": "node ./server.js",
-    "test": "jest --detectOpenHandles *.spec.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "backend": "nodemon server.js",
+    "start": "node server.js"
   },
   "author": {
-    "name": "Group 19",
-    "email": "group19majorproject@gmail.com"
+    "name": "Video Conference",
+    "email": "harishnigam21@gmail.com"
   },
   "license": "",
   "homepage": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/group19-mp/video-conferencing-plugin"
+    "url": "https://github.com/harishnigam21/Video-Conferencing-plugin-for-moodle"
   },
   "bugs": {
-    "url": "https://github.com/group19-mp/video-conferencing-plugin/issues"
+    "url": "https://github.com/harishnigam21/Video-Conferencing-plugin-for-moodle"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -1,3 +1,3 @@
-# Group 19 Signal Server
+#Signal Server
 
 A WebRTC signaling server for our project.

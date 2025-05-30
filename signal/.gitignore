@@ -1,0 +1,8 @@
+# Ignore node_modules
+node_modules/
+
+#Uncomment this next two line after final deployment of project
+#usefulFunction/
+#generated/
+# Ignore .env files
+.env

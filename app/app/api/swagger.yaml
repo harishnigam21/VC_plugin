@@ -1,8 +1,8 @@
 swagger: '2.0'
 
 info:
-    title: Group 19 Video Conference API
-    description: API description for external applications that integrates with Group 19 Video Conference.
+    title: Video Conference API
+    description: API description for external applications that integrates with Video Conference.
     version: 1.0.0
 
 basePath: /api/v1

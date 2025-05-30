@@ -258,7 +258,7 @@ app.post([apiBasePath + '/meeting'], (req, res) => {
     // check if user was authorized for the api call
     let authorization = req.headers.authorization;
     if (authorization != api_key_secret) {
-        log.debug('Group 19 VC get meeting - Unauthorized', {
+        log.debug('VC get meeting - Unauthorized', {
             header: req.headers,
             body: req.body,
         });
@@ -271,7 +271,7 @@ app.post([apiBasePath + '/meeting'], (req, res) => {
     res.end(JSON.stringify({ meeting: meetingURL }));
 
     // log.debug the output if all done
-    log.debug('Group 19 Video Conference get meeting - Authorized', {
+    log.debug('Video Conference get meeting - Authorized', {
         header: req.headers,
         body: req.body,
         meeting: meetingURL,
