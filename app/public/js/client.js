@@ -575,7 +575,7 @@ function getSignalingServer() {
     if (isHttps) {
         return 'https://' + location.hostname;
     }
-    return 'http' + (location.hostname == 'localhost' ? '' : 's') + '://' + location.hostname;
+    return 'http' + (location.hostname == 'vc-back-three.vercel.app' ? '' : 's') + '://' + location.hostname;
 }
 
 /**
