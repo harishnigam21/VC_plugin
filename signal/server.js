@@ -35,7 +35,8 @@ app.use(cors());
 
 // --- Socket.IO CORS Configuration ---
 // This is the MOST IMPORTANT change for Vercel deployments with Socket.IO
-const io = require("socket.io")(server, {
+const { Server } = require("socket.io");
+const io = new Server (server, {
   cors: {
     // Replace with the ACTUAL URL of your frontend application when deployed on Vercel.
     // For local development, you might add 'http://localhost:3000' or whatever your frontend runs on.
