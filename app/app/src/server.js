@@ -59,26 +59,45 @@ const port = process.env.PORT || 3000; // must be the same to client.js signalin
 
 let io, server, host;
 
-if (isHttps) {
+const VERCEL_FRONT_URL = 'https://vc-front-six.vercel.app/';
+const protocol = VERCEL_FRONT_URL ? 'https' : isHttps ? 'https' : 'http';
+const currentHost = VERCEL_FRONT_URL || `localhost:${port}`;
+
+let ioInstance, serverInstance;
+
+if (isHttps && !VERCEL_FRONT_URL) {
+    // Only create HTTPS server if not on Vercel and isHttps is true
     const fs = require('fs');
     const options = {
         key: fs.readFileSync(path.join(__dirname, '../ssl/key.pem'), 'utf-8'),
         cert: fs.readFileSync(path.join(__dirname, '../ssl/cert.pem'), 'utf-8'),
     };
-    server = https.createServer(options, app);
-    host = 'https://' + 'localhost' + ':' + port;
+    serverInstance = https.createServer(options, app);
 } else {
-    server = http.createServer(app);
-    host = 'http://' + 'localhost' + ':' + port;
+    serverInstance = http.createServer(app);
 }
 
 /*  
     Set maxHttpBufferSize from 1e6 (1MB) to 1e7 (10MB)
 */
-io = new Server({
+ioInstance = new Server(serverInstance, {
+    // Pass the server instance
     maxHttpBufferSize: 1e7,
-    transports: ['websocket'],
-}).listen(server);
+    transports: ['websocket'], // Prefer WebSocket
+    cors: {
+        origin: VERCEL_FRONT_URL || 'http://localhost:3000', // Set this ENV var in Vercel
+        methods: ['GET', 'POST'],
+        credentials: true,
+    },
+}); //not listened here, compare with comment with
+
+io = ioInstance;
+server = serverInstance;
+
+// io = new Server({
+//     maxHttpBufferSize: 1e7,
+//     transports: ['websocket'],
+// }).listen(server);
 
 // console.log(io);
 
@@ -90,7 +109,7 @@ const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'
 // Api config
 const { v4: uuidV4 } = require('uuid');
 const apiBasePath = '/api/v1'; // api endpoint path
-const api_docs = host + apiBasePath + '/docs'; // api docs
+const api_docs = `${protocol}://${currentHost}${apiBasePath}/docs`;
 const api_key_secret = process.env.API_KEY_SECRET || 'mirotalk_default_secret';
 
 // Ngrok config
@@ -319,10 +338,11 @@ app.post('/slack', (req, res) => {
  * @returns  entrypoint / Room URL for your meeting.
  */
 function getMeetingURL(host) {
-    return 'http' + (host.includes('localhost') ? '' : 's') + '://' + host + '/join/' + uuidV4();
+    const protocol = host.includes('localhost') ? 'http' : 'https'; // Adjust if your local dev uses https
+    return `${protocol}://${host}/join/${uuidV4()}`;
 }
 
-// 
+//
 
 // not match any of page before, so 404 not found
 app.get('*', function (req, res) {
@@ -362,7 +382,7 @@ if (turnEnabled == 'true') {
 }
 
 // Test Stun and Turn connection with query params
-const testStunTurn = host + '/test?iceServers=' + JSON.stringify(iceServers);
+const testStunTurn = `${protocol}://${currentHost}/test?iceServers=${JSON.stringify(iceServers)}`;
 
 /**
  * Expose server to external with https tunnel using ngrok
@@ -401,21 +421,7 @@ async function ngrokStart() {
 /**
  * Start Local Server with ngrok https tunnel (optional)
  */
-server.listen(port, null, () => {
-    log.debug(
-        `%c
-
-	███████╗██╗ ██████╗ ███╗   ██╗      ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗ 
-	██╔════╝██║██╔════╝ ████╗  ██║      ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗
-	███████╗██║██║  ███╗██╔██╗ ██║█████╗███████╗█████╗  ██████╔╝██║   ██║█████╗  ██████╔╝
-	╚════██║██║██║   ██║██║╚██╗██║╚════╝╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝██╔══╝  ██╔══██╗
-	███████║██║╚██████╔╝██║ ╚████║      ███████║███████╗██║  ██║ ╚████╔╝ ███████╗██║  ██║
-	╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝      ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝ started...
-
-	`,
-        'font-family:monospace',
-    );
-
+server.listen(port,() => {
     // https tunnel
     if (ngrokEnabled == 'true' && isHttps === false) {
         ngrokStart();
@@ -883,7 +889,6 @@ io.sockets.on('connect', async (socket) => {
             await sendToRoom(room_id, socket.id, 'videoPlayer', sendConfig);
         }
     });
-
 }); // end [sockets.on-connect]
 
 /**

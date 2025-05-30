@@ -1,22 +1,22 @@
 const express = require("express");
 const app = express();
 const http = require("http");
-const server = new http.Server(app);
-const io = require("socket.io")(server);
+const server = new http.Server(app); // Keep this line as is
 const helmet = require("helmet");
-const cors = require("cors");
+const cors = require("cors"); // Keep cors for Express routes if needed
+
 const {
   rooms,
   addSocketToRoom,
   removeSocketFromRoom,
   allSocketsForRoom,
 } = require("./rooms");
-const config = require("./config");
+const config = require("./config"); // Assuming config.js exists and exports an object
 
 const CONFIG = {
   title: config.title,
-  host: "vc-back-three.vercel.app",
-  port: process.env.PORT || 4444,
+  // host: "localhost", // <--- REMOVE OR COMMENT OUT THIS LINE FOR VERCEL
+  port: process.env.PORT || 4444, // This is good, Vercel will set process.env.PORT
   timeout: config.timeout || 30000,
   max: config.max || 50,
   debug: config.debug || false,
@@ -26,14 +26,35 @@ process.title = CONFIG.title;
 
 const log = require("debug")("signal:server");
 
+// Use helmet for Express routes
 app.use(helmet());
+
+// Configure CORS for Express routes if your Express routes are consumed by a different origin
+// If this server only serves WebSockets, you might not strictly need this for Express.
 app.use(cors());
 
-// SOCKET.IO
+// --- Socket.IO CORS Configuration ---
+// This is the MOST IMPORTANT change for Vercel deployments with Socket.IO
+const io = require("socket.io")(server, {
+  cors: {
+    // Replace with the ACTUAL URL of your frontend application when deployed on Vercel.
+    // For local development, you might add 'http://localhost:3000' or whatever your frontend runs on.
+    // You can also use an array for multiple origins.
+    origin: "https://vc-front-six.vercel.app/" || "http://localhost:3000", // Example: "https://your-frontend-app.vercel.app"
+    methods: ["GET", "POST"], // Allow these HTTP methods for the CORS preflight request
+    credentials: true, // If you're sending cookies/auth headers with your WebSocket connection
+  },
+});
+// --- End Socket.IO CORS Configuration ---
+
 
 let brokenSockets = {};
 
 function activeSockets(id = null) {
+  // io.sockets.connected is deprecated in Socket.IO v3+.
+  // For Socket.IO v3/v4, you should use io.of("/").sockets for the default namespace.
+  // Assuming you are using Socket.IO v2, this might still work.
+  // If you upgrade Socket.IO, this function needs to be updated.
   return Object.keys(io.sockets.connected).filter(
     (sid) => sid !== id && !brokenSockets[sid]
   );
@@ -41,11 +62,11 @@ function activeSockets(id = null) {
 
 function brokenSocket(socket) {
   brokenSockets[socket.id] = true;
-  // log('--- broken sockets', Object.keys(brokenSockets).length, 'connected', activeSockets().length)
   io.emit("remove", { id: socket.id });
 }
 
 function socketByID(id) {
+  // Same as activeSockets, depends on Socket.IO version.
   return io.sockets.connected[id];
 }
 
@@ -67,7 +88,6 @@ io.on("connection", function (socket) {
   const sid = socket.id;
   let currentRoom;
 
-  // let peers = activeSockets(sid)
   log("connection socket id:", sid);
 
   for (const msg of ["disconnect", "disconnecting", "error"]) {
@@ -88,7 +108,6 @@ io.on("connection", function (socket) {
       });
   });
 
-  // The peer that joined is responsible for initiating WebRTC connections
   socket.on("join", ({ room }) => {
     let peers = allSocketsForRoom(room);
     const full = peers.length >= config.max;
@@ -109,7 +128,6 @@ io.on("connection", function (socket) {
     }
   });
 
-  // Ask for a connection to another socket via ID
   socket.on("signal", (data) => {
     log("signal", data.from, data.to);
     if (data.from !== sid) {
@@ -120,7 +138,6 @@ io.on("connection", function (socket) {
       if (toSocket) {
         toSocket.emit("signal", {
           ...data,
-          // from: socket.id,
         });
       } else {
         log("Cannot find socket for %s", data.to);
@@ -163,17 +180,16 @@ app.use("/", (req, res) => {
 </head>
 <body>
   <p><b>Signal Server</b></p>
-  <p>Running since ${startDate.toISOString()}</p>  
+  <p>Running since ${startDate.toISOString()}</p>
 </body>
 </html>`);
 });
 
+// For Vercel, just listen on the port, no need to specify host.
+// It will default to 0.0.0.0 which is correct for cloud deployments.
 server.listen(
-  {
-    host: CONFIG.host,
-    port: CONFIG.port,
-  },
-  (info) => {
+  CONFIG.port, // Pass only the port
+  () => {
     console.info(`Running on`, server.address());
   }
 );
