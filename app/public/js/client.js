@@ -572,7 +572,7 @@ async function getPeerGeoLocation() {
  * @returns {string} Signaling server URL
  */
 function getSignalingServer() {
-    return 'https://vc-back-three.vercel.app';
+    return 'https://vc-back.onrender.com/';
 }
 
 /**
