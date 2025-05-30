@@ -40,7 +40,7 @@ const io = require("socket.io")(server, {
     // Replace with the ACTUAL URL of your frontend application when deployed on Vercel.
     // For local development, you might add 'http://localhost:3000' or whatever your frontend runs on.
     // You can also use an array for multiple origins.
-    origin: "https://vc-front-six.vercel.app/", // Example: "https://your-frontend-app.vercel.app"
+    origin: "https://vc-front-six.vercel.app", // Example: "https://your-frontend-app.vercel.app"
     methods: ["GET", "POST"], // Allow these HTTP methods for the CORS preflight request
     credentials: true, // If you're sending cookies/auth headers with your WebSocket connection
   },

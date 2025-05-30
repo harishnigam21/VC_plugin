@@ -59,7 +59,7 @@ const port = process.env.PORT || 3000; // must be the same to client.js signalin
 
 let io, server, host;
 
-const VERCEL_FRONT_URL = 'https://vc-front-six.vercel.app/';
+const VERCEL_FRONT_URL = 'https://vc-front-six.vercel.app';
 const protocol = VERCEL_FRONT_URL ? 'https' : isHttps ? 'https' : 'http';
 const currentHost = VERCEL_FRONT_URL || `localhost:${port}`;
 
