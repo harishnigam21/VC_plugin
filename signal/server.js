@@ -44,9 +44,9 @@ const io = require("socket.io")(server, {
     methods: ["GET", "POST"], // Allow these HTTP methods for the CORS preflight request
     credentials: true, // If you're sending cookies/auth headers with your WebSocket connection
   },
+  transports: ["websocket", "polling"],
 });
 // --- End Socket.IO CORS Configuration ---
-
 
 let brokenSockets = {};
 
