@@ -83,7 +83,7 @@ if (isHttps && !VERCEL_FRONT_URL) {
 ioInstance = new Server(serverInstance, {
     // Pass the server instance
     maxHttpBufferSize: 1e7,
-    transports: ['websocket'], // Prefer WebSocket
+    transports: ['websocket', 'polling'], // Prefer WebSocket
     cors: {
         origin: VERCEL_FRONT_URL || 'http://localhost:3000', // Set this ENV var in Vercel
         methods: ['GET', 'POST'],
@@ -421,7 +421,7 @@ async function ngrokStart() {
 /**
  * Start Local Server with ngrok https tunnel (optional)
  */
-server.listen(port,() => {
+server.listen(port, () => {
     // https tunnel
     if (ngrokEnabled == 'true' && isHttps === false) {
         ngrokStart();
