@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "name": "major-project",
+    "name": "vc project",
     "builds": [
        { "src": "app/src/server.js", "use": "@vercel/node" }
     ],
