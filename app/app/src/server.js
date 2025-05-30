@@ -85,7 +85,7 @@ ioInstance = new Server(serverInstance, {
     maxHttpBufferSize: 1e7,
     transports: ['websocket', 'polling'], // Prefer WebSocket
     cors: {
-        origin: VERCEL_FRONT_URL || 'http://localhost:3000', // Set this ENV var in Vercel
+        origin: VERCEL_FRONT_URL, // Set this ENV var in Vercel
         methods: ['GET', 'POST'],
         credentials: true,
     },
