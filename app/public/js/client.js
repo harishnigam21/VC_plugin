@@ -572,10 +572,7 @@ async function getPeerGeoLocation() {
  * @returns {string} Signaling server URL
  */
 function getSignalingServer() {
-    if (isHttps) {
-        return 'https://' + location.hostname;
-    }
-    return 'http' + (location.hostname == 'vc-back-three.vercel.app' ? '' : 's') + '://' + location.hostname;
+    return 'https://vc-back-three.vercel.app';
 }
 
 /**
@@ -691,7 +688,7 @@ function initClientPeer() {
     console.log('01. Connecting to signaling server');
 
     // Disable the HTTP long-polling transport
-    signalingSocket = io({ transports: ['websocket'] });
+    signalingSocket = io(signalingServer, { transports: ['websocket'] });
 
     const transport = signalingSocket.io.engine.transport.name; // in most cases, "polling"
     console.log('02. Connection transport', transport);
@@ -982,7 +979,6 @@ function whoAreYouJoin() {
 async function joinToChannel() {
     console.log('12. join to channel', roomId);
 
-    
     sendToServer('join', {
         channel: roomId,
         userAgent: userAgent,
@@ -1076,15 +1072,14 @@ async function handleAddPeer(config) {
 
     allPeers = peers;
     if (participantsMap.size == 0) {
-        for(let peer_id in peers) {
-            participantsMap.set(peer_id,peers[peer_id]['peer_name']);
+        for (let peer_id in peers) {
+            participantsMap.set(peer_id, peers[peer_id]['peer_name']);
         }
     } else {
-        participantsMap.set(peer_id,peers[peer_id]['peer_name']);
+        participantsMap.set(peer_id, peers[peer_id]['peer_name']);
     }
 
-    console.log(participantsMap)
-
+    console.log(participantsMap);
 
     console.log('*************************************************');
     console.log('[RTCPeerConnection] - PEER_ID', peer_id); // the connected peer_id
@@ -4588,9 +4583,9 @@ function searchPeer() {
  * @param {string} peer_id socket.id
  */
 function msgerRemovePeer(peer_id) {
-    console.log("DELETE******************************")
-    participantsMap.delete(peer_id)
-    console.log(participantsMap)
+    console.log('DELETE******************************');
+    participantsMap.delete(peer_id);
+    console.log(participantsMap);
     let msgerPrivateDiv = getId(peer_id + '_pMsgDiv');
     if (msgerPrivateDiv) {
         let peerToRemove = msgerPrivateDiv.firstChild;
@@ -6520,21 +6515,21 @@ function whiteboard() {
     window.open('../views/whiteboard.html?x=' + checker, '_blank');
 }
 
-function participantListFunction(){
+function participantListFunction() {
     var participantBtn = document.getElementById('participant-btn');
-	var participantList = document.getElementById('participant-list');
-	participantBtn.addEventListener('click', function() {
-		if (participantList.style.display === 'none') {
-			participantList.style.display = 'block';
-		} else {
-			participantList.style.display = 'none';
-		}
-	});
+    var participantList = document.getElementById('participant-list');
+    participantBtn.addEventListener('click', function () {
+        if (participantList.style.display === 'none') {
+            participantList.style.display = 'block';
+        } else {
+            participantList.style.display = 'none';
+        }
+    });
     const participantUl = document.getElementById('participant-ul');
     participantUl.innerHTML = '';
-    participantsMap.forEach(participant =>{
-        const newParticipant = document.createElement("li");
+    participantsMap.forEach((participant) => {
+        const newParticipant = document.createElement('li');
         newParticipant.innerHTML = participant;
         participantUl.appendChild(newParticipant);
-    })
+    });
 }
